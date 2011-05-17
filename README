@@ -1,29 +1,35 @@
 NAME
-    Setup::Test - Various simple setup routines for testing
+    Setup::Multi - Setup using a series of other setup routines
 
 VERSION
-    version 0.01
+    version 0.02
 
 SYNOPSIS
-     use Setup::Unix::Group 'setup_text_case';
+     use Setup::Multi     'setup_multi';
+     use Setup::File::Dir 'setup_dir';
+     use Setup::File      'setup_file';
 
      # simple usage (doesn't save undo data)
-     my $text = 'foo bar baz';
-     my $res = setup_text_case text_ref => \$text, case => 'upper';
+     my $res = setup_multi
+         subs => [
+             setup_dir  => [{name=>'/foo',         should_exist=>1},
+                            {name=>'/foo/bar',     should_exist=>1},
+                            {name=>'/foo/bar/baz', should_exist=>1}],
+             setup_file =>  {name=>"/foo/bar/baz/qux", should_exist=>1},
+         ];
      die unless $res->[0] == 200 || $res->[0] == 304;
 
      # perform setup and save undo data (undo data should be serializable)
-     $res = setup_text_case ..., -undo_action => 'do';
+     $res = setup_multi ..., -undo_action => 'do';
      die unless $res->[0] == 200 || $res->[0] == 304;
      my $undo_data = $res->[3]{undo_data};
 
      # perform undo
-     $res = setup_text_case ..., -undo_action => "undo", -undo_data=>$undo_data;
+     $res = setup_multi ..., -undo_action => "undo", -undo_data=>$undo_data;
      die unless $res->[0] == 200 || $res->[0] == 304;
 
 DESCRIPTION
-    This module provides simple setup functions, useful for testing
-    purposes.
+    This module provides one function: setup_multi.
 
     This module is part of the Setup modules family.
 
@@ -39,13 +45,13 @@ THE SETUP MODULES FAMILY
 FUNCTIONS
     None are exported by default, but they are exportable.
 
-  setup_text_case(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
-    Change text case.
+  setup_multi(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
+    Setup using a series of other setup routines.
 
-    On do, will change text case to UPPER/lower/Title Case. Will save the
-    original text for undo.
-
-    On undo, will restore the original text.
+    Accept a list of setup subroutine name and arguments, or coderefs, and
+    call them each sequentially as steps. If one step fails, the whole steps
+    will be rolled back using the undo data. If all steps succeed, return
+    the concatenated undo data from each step.
 
     Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
     code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
@@ -59,17 +65,34 @@ FUNCTIONS
 
     Arguments ("*" denotes required arguments):
 
-    *   case* => *str*
+    *   subs* => *array*
 
-        Value must be one of:
+        List of setup subroutine (names/refs) and arguments.
 
-         ["upper", "lower", "title"]
+        Setup subroutine can be a string (its name) or a coderef. Argument
+        can be a single hashref or arrayref (of hashrefs). Example, if subs
+        are:
 
-        Case style.
+         [
+           'Pkg::func1'  => \%args,
+           'func2'       => [\%args2, \%args3, \%args4],
+           \&func3       => [\%args5],
+           sub{...}      => \%args6,
+         ]
 
-    *   text_ref* => *str*
+        then the subs which will be called:
 
-        Reference to text.
+         Pkg::func1->(%args);
+         func2->(%args2);
+         func2->(%args3);
+         func2->(%args4);
+         func3(%args5);
+         (sub{...})->(%args6);
+
+FAQ
+  When to use coderef (routine refs) or string (routine names) in subs?
+    Since the routine name is included in undo data, use string to make it
+    easily serializable.
 
 SEE ALSO
     Other modules in Setup:: namespace.

@@ -1,5 +1,5 @@
 ---
-abstract: 'Various simple setup routines for testing'
+abstract: 'Setup using a series of other setup routines'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
@@ -14,10 +14,12 @@ meta-spec:
   version: 1.4
 name: Setup-Multi
 requires:
-  Setup::Test: 0
+  File::Temp: 0
+  Setup::File: 0
   Sub::Spec: 0.13
+  Test::More: 0.96
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-Multi/
   repository: http://github.com/sharyanto/perl-Setup-Multi
-version: 0.01
+version: 0.02
