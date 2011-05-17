@@ -1,0 +1,85 @@
+NAME
+    Setup::Test - Various simple setup routines for testing
+
+VERSION
+    version 0.01
+
+SYNOPSIS
+     use Setup::Unix::Group 'setup_text_case';
+
+     # simple usage (doesn't save undo data)
+     my $text = 'foo bar baz';
+     my $res = setup_text_case text_ref => \$text, case => 'upper';
+     die unless $res->[0] == 200 || $res->[0] == 304;
+
+     # perform setup and save undo data (undo data should be serializable)
+     $res = setup_text_case ..., -undo_action => 'do';
+     die unless $res->[0] == 200 || $res->[0] == 304;
+     my $undo_data = $res->[3]{undo_data};
+
+     # perform undo
+     $res = setup_text_case ..., -undo_action => "undo", -undo_data=>$undo_data;
+     die unless $res->[0] == 200 || $res->[0] == 304;
+
+DESCRIPTION
+    This module provides simple setup functions, useful for testing
+    purposes.
+
+    This module is part of the Setup modules family.
+
+    This module uses Log::Any logging framework.
+
+    This module's functions have Sub::Spec specs.
+
+THE SETUP MODULES FAMILY
+    I use the "Setup::" namespace for the Setup modules family. See
+    Setup::File for more details on the goals, characteristics, and
+    implementation of Setup modules family.
+
+FUNCTIONS
+    None are exported by default, but they are exportable.
+
+  setup_text_case(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
+    Change text case.
+
+    On do, will change text case to UPPER/lower/Title Case. Will save the
+    original text for undo.
+
+    On undo, will restore the original text.
+
+    Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
+    code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
+    error message, RESULT is the actual result.
+
+    This function supports undo operation. See Sub::Spec::Clause::features
+    for details on how to perform do/undo/redo.
+
+    This function supports dry-run (simulation) mode. To run in dry-run
+    mode, add argument "-dry_run" => 1.
+
+    Arguments ("*" denotes required arguments):
+
+    *   case* => *str*
+
+        Value must be one of:
+
+         ["upper", "lower", "title"]
+
+        Case style.
+
+    *   text_ref* => *str*
+
+        Reference to text.
+
+SEE ALSO
+    Other modules in Setup:: namespace.
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2011 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+

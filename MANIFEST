@@ -1,0 +1,15 @@
+Build.PL
+Changes
+LICENSE
+MANIFEST
+MANIFEST.SKIP
+META.yml
+README
+dist.ini
+lib/Setup/Test.pm
+t/00-compile.t
+t/release-pod-coverage.t
+t/release-pod-syntax.t
+t/setup_text_case.t
+t/testlib.pl
+weaver.ini
