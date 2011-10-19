@@ -2,7 +2,7 @@ NAME
     Setup::Multi - Setup using a series of other setup routines
 
 VERSION
-    version 0.02
+    version 0.03
 
 SYNOPSIS
      use Setup::Multi     'setup_multi';
@@ -53,6 +53,10 @@ FUNCTIONS
     will be rolled back using the undo data. If all steps succeed, return
     the concatenated undo data from each step.
 
+    This function is declared as supporting the 'undo' and 'dry_run'
+    features, so all setup routines mentioned in 'subs' argument must also
+    support those two features (but this is not currently checked).
+
     Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
     code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
     error message, RESULT is the actual result.
@@ -69,7 +73,9 @@ FUNCTIONS
 
         List of setup subroutine (names/refs) and arguments.
 
-        Setup subroutine can be a string (its name) or a coderef. Argument
+        Setup subroutine can be a string (its name) or a coderef. If
+        subroutine is a non-qualified name (i.e., foo instead of
+        Package::foo), it will be qualified with caller's package. Argument
         can be a single hashref or arrayref (of hashrefs). Example, if subs
         are:
 

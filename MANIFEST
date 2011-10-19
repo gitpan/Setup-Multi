@@ -8,6 +8,7 @@ README
 dist.ini
 lib/Setup/Multi.pm
 t/00-compile.t
+t/package.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
 t/setup_multi.t

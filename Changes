@@ -1,5 +1,12 @@
 Revision history for Setup-Multi
 
+0.03    2011-10-11
+
+        [ENHANCEMENTS]
+
+        - Use caller's package when sub is not fully qualified.
+
+
 0.02    2011-05-17
 
         - First release.

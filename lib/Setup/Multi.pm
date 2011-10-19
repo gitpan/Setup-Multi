@@ -1,6 +1,6 @@
 package Setup::Multi;
-BEGIN {
-  $Setup::Multi::VERSION = '0.02';
+{
+  $Setup::Multi::VERSION = '0.03';
 }
 # ABSTRACT: Setup using a series of other setup routines
 
@@ -24,14 +24,20 @@ each sequentially as steps. If one step fails, the whole steps will be rolled
 back using the undo data. If all steps succeed, return the concatenated undo
 data from each step.
 
+This function is declared as supporting the 'undo' and 'dry_run' features, so
+all setup routines mentioned in 'subs' argument must also support those two
+features (but this is not currently checked).
+
 _
     args => {
         subs => ['array*' => {
             summary => 'List of setup subroutine (names/refs) and arguments',
             description => <<'_',
 
-Setup subroutine can be a string (its name) or a coderef. Argument can be a
-single hashref or arrayref (of hashrefs). Example, if subs are:
+Setup subroutine can be a string (its name) or a coderef. If subroutine is a
+non-qualified name (i.e., foo instead of Package::foo), it will be qualified
+with caller's package. Argument can be a single hashref or arrayref (of
+hashrefs). Example, if subs are:
 
  [
    'Pkg::func1'  => \%args,
@@ -79,6 +85,12 @@ sub setup_multi {
             if (!defined($s)) {
                 return [400, "#$i: Function not defined"]
             } if (!ref($s)) {
+                return [400, "Invalid function syntax $s"]
+                    unless $s =~ /\A\w+(?:::\w+)*\z/;
+                if ($s !~ /::/) { # not qualified
+                    my $callpkg = caller();
+                    $s = "$callpkg\::$s";
+                }
                 return [400, "#$i: Function $s doesn't exist"]
                     unless defined(&{$s});
                 $sref = \&{$s};
@@ -125,6 +137,7 @@ sub setup_multi {
             $sub_args{-undo_action} = $step->[0];
             $sub_args{-undo_data}   = $step->[3] if $step->[0] eq 'undo';
             $sub_args{-dry_run}     = $dry_run;
+            $log->tracef("Calling %s(%s) ...", $sub, \%sub_args);
             my $res = $subref->(%sub_args);
             if ($res->[0] == 200) {
                 $changed++;
@@ -170,7 +183,7 @@ Setup::Multi - Setup using a series of other setup routines
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -227,6 +240,10 @@ each sequentially as steps. If one step fails, the whole steps will be rolled
 back using the undo data. If all steps succeed, return the concatenated undo
 data from each step.
 
+This function is declared as supporting the 'undo' and 'dry_run' features, so
+all setup routines mentioned in 'subs' argument must also support those two
+features (but this is not currently checked).
+
 Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error code
 between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing error
 message, RESULT is the actual result.
@@ -245,8 +262,10 @@ Arguments (C<*> denotes required arguments):
 
 List of setup subroutine (names/refs) and arguments.
 
-Setup subroutine can be a string (its name) or a coderef. Argument can be a
-single hashref or arrayref (of hashrefs). Example, if subs are:
+Setup subroutine can be a string (its name) or a coderef. If subroutine is a
+non-qualified name (i.e., foo instead of Package::foo), it will be qualified
+with caller's package. Argument can be a single hashref or arrayref (of
+hashrefs). Example, if subs are:
 
  [
    'Pkg::func1'  => \%args,
