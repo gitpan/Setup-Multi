@@ -1,6 +1,6 @@
 package Setup::Multi;
 {
-  $Setup::Multi::VERSION = '0.03';
+  $Setup::Multi::VERSION = '0.04';
 }
 # ABSTRACT: Setup using a series of other setup routines
 
@@ -126,7 +126,7 @@ sub setup_multi {
   STEP:
     for my $i (0..@$steps-1) {
         my $step = $steps->[$i];
-        $log->tracef("step %d of 0..%d: %s", $i, @$steps-1, $step);
+        $log->tracef("step %d/%d: %s", $i+1, scalar @$steps, $step);
         my $err;
         return [400, "Invalid step (not array)"] unless ref($step) eq 'ARRAY';
 
@@ -142,7 +142,8 @@ sub setup_multi {
             if ($res->[0] == 200) {
                 $changed++;
             } elsif ($res->[0] != 304) {
-                $err = "(failure in step #$i $sub) $res->[0] - $res->[1]";
+                $err = sprintf "(failure in step %d/%d %s) %d - %s",
+                    $i+1, scalar @$steps, $sub, $res->[0], $res->[1];
                 goto CHECK_ERR;
             }
             unshift @$undo_steps,
@@ -154,12 +155,14 @@ sub setup_multi {
       CHECK_ERR:
         if ($err) {
             if ($rollback) {
-                die "Failed rollback step $i of 0..".(@$steps-1).": $err";
+                die sprintf "Failed rollback step %d/%d: %s",
+                    $i+1, scalar @$steps, $err;
             } else {
                 $log->tracef("Step failed: $err, performing rollback (%s)...",
                              $undo_steps);
                 $rollback = $err;
                 $steps = $undo_steps;
+                $undo_steps = [];
                 goto STEP; # perform steps all over again
             }
         }
@@ -183,7 +186,7 @@ Setup::Multi - Setup using a series of other setup routines
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 

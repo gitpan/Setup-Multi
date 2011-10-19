@@ -1,5 +1,12 @@
 Revision history for Setup-Multi
 
+0.04    2011-10-12
+
+        [BUG FIXES]
+
+        - Forgot to reset undo_steps when doing rollback.
+
+
 0.03    2011-10-11
 
         [ENHANCEMENTS]

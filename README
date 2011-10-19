@@ -2,7 +2,7 @@ NAME
     Setup::Multi - Setup using a series of other setup routines
 
 VERSION
-    version 0.03
+    version 0.04
 
 SYNOPSIS
      use Setup::Multi     'setup_multi';
