@@ -1,12 +1,13 @@
 package Setup::Multi;
 {
-  $Setup::Multi::VERSION = '0.04';
+  $Setup::Multi::VERSION = '0.05';
 }
 # ABSTRACT: Setup using a series of other setup routines
 
 use 5.010;
 use strict;
 use warnings;
+use Data::Dump::OneLine qw(dump1);
 use Log::Any '$log';
 
 require Exporter;
@@ -142,8 +143,9 @@ sub setup_multi {
             if ($res->[0] == 200) {
                 $changed++;
             } elsif ($res->[0] != 304) {
-                $err = sprintf "(failure in step %d/%d %s) %d - %s",
-                    $i+1, scalar @$steps, $sub, $res->[0], $res->[1];
+                $err = sprintf "(failure in step %d/%d: %s(%s)) %d - %s",
+                    $i+1, scalar @$steps, $sub, dump1(\%sub_args), 
+		        $res->[0], $res->[1];
                 goto CHECK_ERR;
             }
             unshift @$undo_steps,
@@ -186,7 +188,7 @@ Setup::Multi - Setup using a series of other setup routines
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 

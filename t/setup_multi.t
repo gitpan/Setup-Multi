@@ -81,8 +81,14 @@ test_setup_multi(
     args       => {
         subs => [
             "Setup::File::Dir::setup_dir" => [
-                {path=>"$tmp_dir/d1b",         should_exist=>1},
-                {path=>"$tmp_dir/d1b/d2b/d3b", should_exist=>1}]],
+                {path=>"$tmp_dir/d1b",             should_exist=>1},
+                {path=>"$tmp_dir/d1b/2",           should_exist=>1},
+                {path=>"$tmp_dir/d1b/2/3",         should_exist=>1},
+                {path=>"$tmp_dir/d1b/2/3/4",       should_exist=>1},
+                {path=>"$tmp_dir/d1b/2/3/4/5/6",   should_exist=>1}, # fail here
+                {should_exist=>1}, # missing arg, but won't be reached
+                {path=>"$tmp_dir/d1b/2/3/4/5/6/7", should_exist=>1},
+            ]],
         -undo_action=>'do'},
     status     => 500,
     posttest   => sub {

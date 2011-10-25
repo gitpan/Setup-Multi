@@ -17,12 +17,13 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-Multi",
-  "dist_version" => "0.04",
+  "dist_version" => "0.05",
   "license" => "perl",
   "module_name" => "Setup::Multi",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
+    "Data::Dump::OneLine" => 0,
     "File::Temp" => 0,
     "Setup::File" => 0,
     "Sub::Spec" => "0.13",
