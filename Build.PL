@@ -17,7 +17,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-Multi",
-  "dist_version" => "0.05",
+  "dist_version" => "0.06",
   "license" => "perl",
   "module_name" => "Setup::Multi",
   "recommends" => {},
@@ -25,8 +25,8 @@ my %module_build_args = (
   "requires" => {
     "Data::Dump::OneLine" => 0,
     "File::Temp" => 0,
+    "Rinci" => "1.1.0",
     "Setup::File" => 0,
-    "Sub::Spec" => "0.13",
     "Test::More" => "0.96",
     "perl" => "5.010000"
   },

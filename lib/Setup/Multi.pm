@@ -1,8 +1,4 @@
 package Setup::Multi;
-{
-  $Setup::Multi::VERSION = '0.05';
-}
-# ABSTRACT: Setup using a series of other setup routines
 
 use 5.010;
 use strict;
@@ -13,6 +9,8 @@ use Log::Any '$log';
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_multi);
+
+our $VERSION = '0.06'; # VERSION
 
 our %SPEC;
 
@@ -127,7 +125,7 @@ sub setup_multi {
   STEP:
     for my $i (0..@$steps-1) {
         my $step = $steps->[$i];
-        $log->tracef("step %d/%d: %s", $i+1, scalar @$steps, $step);
+        $log->tracef("multi/step %d/%d: %s", $i+1, scalar @$steps, $step);
         my $err;
         return [400, "Invalid step (not array)"] unless ref($step) eq 'ARRAY';
 
@@ -144,7 +142,7 @@ sub setup_multi {
                 $changed++;
             } elsif ($res->[0] != 304) {
                 $err = sprintf "(failure in step %d/%d: %s(%s)) %d - %s",
-                    $i+1, scalar @$steps, $sub, dump1(\%sub_args), 
+                    $i+1, scalar @$steps, $sub, dump1(\%sub_args),
 		        $res->[0], $res->[1];
                 goto CHECK_ERR;
             }
@@ -178,8 +176,10 @@ sub setup_multi {
     return [$changed? 200 : 304, $changed? "OK" : "Nothing done", $data, $meta];
 }
 1;
+# ABSTRACT: Setup using a series of other setup routines
 
 
+__END__
 =pod
 
 =head1 NAME
@@ -188,7 +188,7 @@ Setup::Multi - Setup using a series of other setup routines
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -223,7 +223,7 @@ This module is part of the Setup modules family.
 
 This module uses L<Log::Any> logging framework.
 
-This module's functions have L<Sub::Spec> specs.
+This module has L<Rinci> metadata.
 
 =head1 THE SETUP MODULES FAMILY
 
@@ -307,13 +307,10 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Steven Haryanto.
+This software is copyright (c) 2012 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 
