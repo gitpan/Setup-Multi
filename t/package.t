@@ -17,17 +17,20 @@ use vars qw($tmp_dir);
 
 setup();
 
+*Test::Setup::setup_dir = \&setup_dir;
+
 test_setup_multi(
-    name       => "unqualified sub from caller",
-    args       => {
+    name          => "unqualified sub from caller",
+    args          => {
         subs => [
             "setup_dir" => [
                 {path=>"$tmp_dir/dir1",      should_exist=>1},
             ]],
     },
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
+    check_unsetup => sub {
+        ok(!(-d "$tmp_dir/dir1"), "dir1 doesn't exist");
+    },
+    check_setup   => sub {
         ok((-d "$tmp_dir/dir1"), "dir1 exists");
     },
 );

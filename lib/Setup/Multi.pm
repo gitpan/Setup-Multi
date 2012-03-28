@@ -10,12 +10,12 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_multi);
 
-our $VERSION = '0.06'; # VERSION
+our $VERSION = '0.07'; # VERSION
 
 our %SPEC;
 
 $SPEC{setup_multi} = {
-    summary  => "Setup using a series of other setup routines",
+    summary  => "Setup using a series of other setup functions",
     description => <<'_',
 
 Accept a list of setup subroutine name and arguments, or coderefs, and call them
@@ -24,7 +24,7 @@ back using the undo data. If all steps succeed, return the concatenated undo
 data from each step.
 
 This function is declared as supporting the 'undo' and 'dry_run' features, so
-all setup routines mentioned in 'subs' argument must also support those two
+all setup functions mentioned in 'subs' argument must also support those two
 features (but this is not currently checked).
 
 _
@@ -157,6 +157,9 @@ sub setup_multi {
             if ($rollback) {
                 die sprintf "Failed rollback step %d/%d: %s",
                     $i+1, scalar @$steps, $err;
+            } elsif ($dry_run) {
+                return [500, sprintf("Step %d/%d failed: $err",
+                                     $i+1, scalar(@$steps))];
             } else {
                 $log->tracef("Step failed: $err, performing rollback (%s)...",
                              $undo_steps);
@@ -176,7 +179,7 @@ sub setup_multi {
     return [$changed? 200 : 304, $changed? "OK" : "Nothing done", $data, $meta];
 }
 1;
-# ABSTRACT: Setup using a series of other setup routines
+# ABSTRACT: Setup using a series of other setup functions
 
 
 __END__
@@ -184,11 +187,11 @@ __END__
 
 =head1 NAME
 
-Setup::Multi - Setup using a series of other setup routines
+Setup::Multi - Setup using a series of other setup functions
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -217,28 +220,27 @@ version 0.06
 
 =head1 DESCRIPTION
 
-This module provides one function: B<setup_multi>.
-
-This module is part of the Setup modules family.
-
 This module uses L<Log::Any> logging framework.
 
 This module has L<Rinci> metadata.
 
-=head1 THE SETUP MODULES FAMILY
+=head1 FAQ
 
-I use the C<Setup::> namespace for the Setup modules family. See L<Setup::File>
-for more details on the goals, characteristics, and implementation of Setup
-modules family.
+=head2 When to use coderef (routine refs) or string (routine names) in subs?
+
+Since the routine name is included in undo data, use string to make it easily
+serializable.
+
+=head1 SEE ALSO
+
+L<Setup>
 
 =head1 FUNCTIONS
 
-None are exported by default, but they are exportable.
 
-=head2 setup_multi(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
+=head2 setup_multi(%args) -> [status, msg, result, meta]
 
-
-Setup using a series of other setup routines.
+Setup using a series of other setup functions.
 
 Accept a list of setup subroutine name and arguments, or coderefs, and call them
 each sequentially as steps. If one step fails, the whole steps will be rolled
@@ -246,20 +248,10 @@ back using the undo data. If all steps succeed, return the concatenated undo
 data from each step.
 
 This function is declared as supporting the 'undo' and 'dry_run' features, so
-all setup routines mentioned in 'subs' argument must also support those two
+all setup functions mentioned in 'subs' argument must also support those two
 features (but this is not currently checked).
 
-Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error code
-between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing error
-message, RESULT is the actual result.
-
-This function supports undo operation. See L<Sub::Spec::Clause::features> for
-details on how to perform do/undo/redo.
-
-This function supports dry-run (simulation) mode. To run in dry-run mode, add
-argument C<-dry_run> => 1.
-
-Arguments (C<*> denotes required arguments):
+Arguments ('*' denotes required arguments):
 
 =over 4
 
@@ -290,16 +282,9 @@ then the subs which will be called:
 
 =back
 
-=head1 FAQ
+Return value:
 
-=head2 When to use coderef (routine refs) or string (routine names) in subs?
-
-Since the routine name is included in undo data, use string to make it easily
-serializable.
-
-=head1 SEE ALSO
-
-Other modules in Setup:: namespace.
+Returns an enveloped result (an array). First element (status) is an integer containing HTTP status code (200 means OK, 4xx caller error, 5xx function error). Second element (msg) is a string containing error message, or 'OK' if status is 200. Third element (result) is optional, the actual result. Fourth element (meta) is called result metadata and is optional, a hash that contains extra information.
 
 =head1 AUTHOR
 

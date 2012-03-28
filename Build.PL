@@ -12,12 +12,12 @@ my %module_build_args = (
   "configure_requires" => {
     "Module::Build" => "0.3601"
   },
-  "dist_abstract" => "Setup using a series of other setup routines",
+  "dist_abstract" => "Setup using a series of other setup functions",
   "dist_author" => [
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-Multi",
-  "dist_version" => "0.06",
+  "dist_version" => "0.07",
   "license" => "perl",
   "module_name" => "Setup::Multi",
   "recommends" => {},
@@ -26,8 +26,10 @@ my %module_build_args = (
     "Data::Dump::OneLine" => 0,
     "File::Temp" => 0,
     "Rinci" => "1.1.0",
+    "Setup" => "1.0.0",
     "Setup::File" => 0,
     "Test::More" => "0.96",
+    "Test::Setup" => "1.01",
     "perl" => "5.010000"
   },
   "script_files" => []

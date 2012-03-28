@@ -1,5 +1,12 @@
 Revision history for Setup-Multi
 
+0.07    2012-03-02
+
+        - Use Test::Setup.
+
+        - Fix: don't rollback on dry_run.
+
+
 0.06    2012-03-02
 
         No functional changes. Replace Sub::Spec with Rinci.

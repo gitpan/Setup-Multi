@@ -6,6 +6,7 @@ use File::chdir;
 use File::Temp qw(tempdir);
 use Setup::Multi qw(setup_multi);
 use Test::More 0.96;
+use Test::Setup qw(test_setup);
 
 sub setup {
     $::tmp_dir = tempdir(CLEANUP => 1);
@@ -25,32 +26,19 @@ sub teardown {
 }
 
 sub test_setup_multi {
-    my %args = @_;
-    subtest "$args{name}" => sub {
+    my %tsmargs = @_;
 
-        my %setup_args = %{ $args{args} };
-        my $res;
-        eval {
-            $res = setup_multi(%setup_args);
-        };
-        my $eval_err = $@;
+    my %tsargs;
+    for (qw/check_setup check_unsetup check_state1 check_state2
+            name dry_do_error do_error set_state1 set_state2 prepare cleanup/) {
+        $tsargs{$_} = $tsmargs{$_};
+    }
+    $tsargs{function} = \&setup_multi;
 
-        if ($args{dies}) {
-            ok($eval_err, "dies");
-        } else {
-            ok(!$eval_err, "doesn't die") or diag $eval_err;
-        }
+    my %fargs = %{ $tsmargs{args} };
+    $tsargs{args} = \%fargs;
 
-        #diag explain $res;
-        if ($args{status}) {
-            is($res->[0], $args{status}, "status $args{status}")
-                or diag explain($res);
-        }
-
-        if ($args{posttest}) {
-            $args{posttest}->($res);
-        }
-    };
+    test_setup(%tsargs);
 }
 
 1;
